@@ -1,0 +1,7 @@
+.cache
+build
+dist
+FileUtilsLib.egg-info
+requirements/*
+!requirements/readme.txt
+*.pyc

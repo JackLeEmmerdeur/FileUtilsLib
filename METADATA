@@ -1,0 +1,19 @@
+Metadata-Version: 2.0
+Name: FileUtilsLib
+Version: 0.0.1
+Summary: Helper code for file operations (fdisk, dd, general)
+Home-page: http://buccaneersdan.de/FileUtilsLib/
+Author: Daniel Hilker
+Author-email: daniel@buccaneersdan.de
+License: CC
+Platform: UNKNOWN
+Classifier: Development Status :: 0.0.1 - Development/Alpha
+Classifier: Environment :: Python Library
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: CC License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+
+Library containing file helper code (fdisk, dd, general) for Application BackTheFooUp and EasyDD
