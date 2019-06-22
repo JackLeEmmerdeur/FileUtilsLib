@@ -2,13 +2,22 @@ from enum import Enum
 from math import floor, log
 from os import statvfs_result
 from os.path import realpath, ismount, dirname
+from fileutilslib.misclib.helpertools import string_is_empty, strip
 from typing import Dict
+from os import sep
 
 
 class FileSizes(Enum):
 	TB_BYTE_SIZE = 1024 * 1024 * 1024 * 1024
 	GB_BYTE_SIZE = 1024 * 1024 * 1024
 	MB_BYTE_SIZE = 1024 * 1024
+
+
+def is_directory_path(path: str):
+	if not string_is_empty(path):
+		c = len(path)
+		return strip(path)[c-1:c] == sep
+	return False
 
 
 def sizeinfo_from_statvfs_result(statvfs_res: statvfs_result) -> Dict:

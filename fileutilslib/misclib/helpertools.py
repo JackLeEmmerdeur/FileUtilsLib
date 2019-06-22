@@ -4,6 +4,7 @@ from typing import Any, List, Union
 from six import string_types, text_type
 from os import system
 from inspect import isbuiltin, ismethod
+from fileutilslib.classes.ConsoleColors import ConsoleColors, ConsoleColor
 
 
 def is_linux():
@@ -273,3 +274,17 @@ def humantime(secs: int) -> str:
 		m = int(rsecs / 60)
 		s = int(rsecs % 60)
 		return "{}:{}:{} hr".format(fs(str(h)), fs(str(m)), fs(str(s)))
+
+
+def singlecharinput(msg, color: ConsoleColors):
+	nmsg = None
+
+	if color is not ConsoleColors.NONE:
+		nmsg = ConsoleColor.colorline(
+			msg + " ",
+			color
+		)
+	else:
+		nmsg = msg
+
+	return strip(input(nmsg)).lower()

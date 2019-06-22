@@ -23,6 +23,7 @@ setup(
 		'fileutilslib',
 		'fileutilslib.disklib',
 		'fileutilslib.misclib',
+		'fileutilslib.classes'
 	],
 	classifiers=[
 		'Development Status :: 0.0.1 - Alpha',
