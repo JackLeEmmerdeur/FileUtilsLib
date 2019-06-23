@@ -2,13 +2,13 @@ from sys import exc_info
 from traceback import format_exception
 from typing import Any, List, Union
 from six import string_types, text_type
-from os import system
+from sys import platform
 from inspect import isbuiltin, ismethod
 from fileutilslib.classes.ConsoleColors import ConsoleColors, ConsoleColor
 
 
 def is_linux():
-	return system().lower().find("linux") > -1
+	return platform == "linux"
 
 
 def is_function(var: Any) -> bool:

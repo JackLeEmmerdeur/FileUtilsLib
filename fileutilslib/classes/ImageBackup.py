@@ -3,7 +3,7 @@ from plumbum import local
 from os import remove, statvfs, stat
 from subprocess import PIPE
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Callable
 from fileutilslib.disklib.fdisktools import fdisklist, fdiskdevicesize, predict_job_time
 from fileutilslib.misclib.helpertools import string_equal_utf8, strip, string_is_empty, humantime, singlecharinput
 from fileutilslib.disklib.filetools import sizeinfo_from_statvfs_result, find_mount_point, bytes_to_unit, is_directory_path
@@ -179,7 +179,7 @@ class ImageBackup:
 			else:
 				self._devicepath = Path(device_str)
 
-	def start_dd(self, interactive: bool = False, ddbatchsize: str = None) -> int:
+	def start_dd(self, interactive: bool = False, ddbatchsize: str = None, finished_handler: Callable=None) -> int:
 		retcode = None
 		devpath = str(self._devicepath.absolute())
 		imagepath = str(self._imagepath.absolute())
@@ -300,5 +300,5 @@ class ImageBackup:
 					print(ConsoleColor.colorline("Successfully created image!", ConsoleColors.OKGREEN))
 				else:
 					print(ConsoleColor.colorline("No Result from dd (image might be ok)!", ConsoleColors.WARNING))
-
+			finished_handler(retcode, imagepath)
 			return retcode

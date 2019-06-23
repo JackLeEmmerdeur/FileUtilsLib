@@ -5,12 +5,73 @@ from os.path import realpath, ismount, dirname
 from fileutilslib.misclib.helpertools import string_is_empty, strip
 from typing import Dict
 from os import sep
+from pathlib import Path
+from plumbum import local
+from fileutilslib.misclib.helpertools import singlecharinput
+from fileutilslib.classes.ConsoleColors import ConsoleColor, ConsoleColors
 
 
 class FileSizes(Enum):
 	TB_BYTE_SIZE = 1024 * 1024 * 1024 * 1024
 	GB_BYTE_SIZE = 1024 * 1024 * 1024
 	MB_BYTE_SIZE = 1024 * 1024
+
+
+def sevenzip(interactive: bool, compress_type: str, inputfilepath: str, outputfilepath: str=None):
+	if string_is_empty(inputfilepath):
+		raise Exception("No input file path provided")
+
+	if string_is_empty(compress_type):
+		if interactive is True:
+			compress_type = strip(
+				input(
+					"Type the name of the compression algorithm (7z or zip)\n"
+				)
+			).lower()
+		else:
+			compress_type = "zip"
+
+	if string_is_empty(compress_type):
+		raise Exception("No compression algorithm chosen")
+
+	if compress_type != "zip" and compress_type != "7z":
+		raise Exception("Wrong compression algorithm (use 7z or zip)")
+
+	if string_is_empty(outputfilepath):
+		if interactive is True:
+			outputfilepath = strip(input("Type the path of the compressed image file\n"))
+		else:
+			outputfilepath = inputfilepath + "." + compress_type
+
+	if string_is_empty(outputfilepath):
+		raise Exception("File path empty")
+
+	cancelled = False
+
+	p = Path(outputfilepath)
+
+	if p.exists():
+		yn = singlecharinput(
+			"The file '{}' exists. Do you want to delete it?".format(
+				outputfilepath
+			), ConsoleColors.WARNING
+		)
+		if yn == "n":
+			cancelled = True
+			print(ConsoleColor.colorline("Cancelling compress process", ConsoleColors.OKBLUE))
+		else:
+			print(ConsoleColor.colorline("Deleting '{}'".format(outputfilepath), ConsoleColors.FAIL))
+			if Path(outputfilepath).exists():
+				print(ConsoleColor.colorline(
+					"Could not delete '{}'".format(
+						outputfilepath
+					), ConsoleColors.FAIL)
+				)
+				cancelled = True
+
+	if cancelled is False:
+		sz = local["7z"]
+		sz.run(["a", str(p.absolute()), inputfilepath])
 
 
 def is_directory_path(path: str):
