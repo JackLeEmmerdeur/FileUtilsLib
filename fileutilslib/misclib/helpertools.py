@@ -201,13 +201,17 @@ def strip(text):
 	return text.lstrip().rstrip()
 
 
-def get_reformatted_exception(msg, e) -> str:
+def get_reformatted_exception(msg, exc, print_stack=True) -> str:
 	tb = ""
-	excfmtlist = format_exception(type(e), e, exc_info()[2])
-	for (index, excfmtitem) in enumerate(excfmtlist):
-		if index > 0:
-			tb += "\r\n"
-		tb += "\t" + excfmtitem
+	excfmtlist = format_exception(type(exc), exc, exc_info()[2], 1 if print_stack is False else None)
+
+	if print_stack is False:
+		tb = excfmtlist[len(excfmtlist) - 1]
+	else:
+		for (index, excfmtitem) in enumerate(excfmtlist):
+			if index > 0:
+				tb += "\r\n"
+			tb += excfmtitem
 	return "{}\r\n{}".format(msg, tb)
 
 

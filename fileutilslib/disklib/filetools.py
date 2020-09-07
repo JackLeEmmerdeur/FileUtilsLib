@@ -1,20 +1,47 @@
 from enum import Enum
 from math import floor, log
-from os import statvfs_result
-from os.path import realpath, ismount, dirname
+from os import statvfs_result, getcwd, listdir, remove
+from os.path import realpath, ismount, dirname, sep, isfile, isdir, join
 from fileutilslib.misclib.helpertools import string_is_empty, strip
 from typing import Dict
-from os import sep
 from pathlib import Path
 from plumbum import local
 from fileutilslib.misclib.helpertools import singlecharinput
 from fileutilslib.classes.ConsoleColors import ConsoleColor, ConsoleColors
+from tempfile import TemporaryFile
+from errno import EACCES
 
 
 class FileSizes(Enum):
 	TB_BYTE_SIZE = 1024 * 1024 * 1024 * 1024
 	GB_BYTE_SIZE = 1024 * 1024 * 1024
 	MB_BYTE_SIZE = 1024 * 1024
+
+
+def filesep():
+	return sep
+
+
+def remove_file(path):
+	remove(path)
+
+
+def dir_is_writable(path):
+	# courtesy of user zak in
+	# https://stackoverflow.com/questions/2113427/determining-whether-a-directory-is-writeable
+	try:
+		testfile = TemporaryFile(dir=path)
+		testfile.close()
+	except OSError as e:
+		if e.errno == EACCES:  # 13
+			return False
+		e.filename = path
+		raise
+	return True
+
+
+def current_workingdir():
+	return getcwd()
 
 
 def sevenzip(interactive: bool, compress_type: str, inputfilepath: str, outputfilepath: str=None):
@@ -72,6 +99,20 @@ def sevenzip(interactive: bool, compress_type: str, inputfilepath: str, outputfi
 	if cancelled is False:
 		sz = local["7z"]
 		sz.run(["a", str(p.absolute()), inputfilepath])
+
+
+def path_from_partindex(p: Path, from_index: int, to_index: int=-1):
+	pl = len(p.parts)
+	po = ""
+	a = (from_index if pl > from_index > -1 else 0) + 1
+	b = (to_index if pl > to_index > -1 else pl - 1) + 1
+	n = 0
+	for i in range(a, b):
+		if n > 0:
+			po += sep
+		po += p.parts[i]
+		n += 1
+	return po
 
 
 def is_directory_path(path: str):
@@ -160,3 +201,56 @@ def get_filesize_progress_divider(total_size: int):
 		d = 10
 
 	return d
+
+
+def count_file_rows(fname):
+	with open(fname) as f:
+		for i, l in enumerate(f):
+			pass
+	return i + 1
+
+
+def walk_flat(folder, onlyfiles=False, onlydirs=False, yieldresults=False):
+	"""
+	Lists file- or directory-nodes below a directory non-recursively
+	:param folder: The directory to list the nodes for
+	:param onlyfiles: Only lists files, if False it depends on param onlydirs
+	:param onlydirs: Only lists dirs, if False it depends on param onlyfiles
+	:param yieldresults: If True the function yields filepath-results to use them in a for-loop, otherwise results a list
+	:return: None if dir is not a directory or onlydirs and onlyfiles is False/True simultaneously otherwise a list or a generator
+	"""
+	if not isdir(folder):
+		return None
+
+	if (onlyfiles is False and onlydirs is False) or (onlyfiles is True and onlydirs is True):
+		return None
+
+	res = None
+
+	for fd in listdir(folder):
+		fullpath = join(folder, fd)
+
+		if onlyfiles is True:
+			if isfile(fullpath):
+				if yieldresults:
+					yield fd
+				else:
+					if res is None:
+						res = []
+					res.append(fd)
+		elif onlydirs is True:
+			if isdir(fullpath):
+				if yieldresults:
+					yield fd
+				else:
+					if res is None:
+						res = []
+					res.append(fd)
+		else:
+			if yieldresults:
+				yield fd
+			else:
+				if res is None:
+					res = []
+				res.append(fd)
+	return res
